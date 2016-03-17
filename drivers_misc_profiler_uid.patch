@@ -1,0 +1,15 @@
+diff --git a/drivers/misc/tegra-profiler/main.c b/drivers/misc/tegra-profiler/main.c
+index 80a2b73..ed30658 100644
+--- a/drivers/misc/tegra-profiler/main.c
++++ b/drivers/misc/tegra-profiler/main.c
+@@ -209,8 +209,8 @@ set_parameters(struct quadd_parameters *p)
+ 		return -ESRCH;
+ 	}
+ 
+-	current_uid = current_fsuid();
+-	task_uid = task_uid(task);
++	current_uid = current_fsuid().val;
++	task_uid = task_uid(task).val;
+ 	pr_info("owner/task uids: %u/%u\n", current_uid, task_uid);
+ 
+ 	if (!capable(CAP_SYS_ADMIN)) {
