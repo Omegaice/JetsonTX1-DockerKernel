@@ -138,6 +138,9 @@ rm $TEGRA_ROOT/rootfs/docker-compose_1.7.1-41_armhf.deb
 curl -o $TEGRA_ROOT/rootfs/etc/init/docker.conf https://raw.githubusercontent.com/docker/docker/v1.10.3/contrib/init/upstart/docker.conf
 sed -i "s/overlay/aufs/g" $TEGRA_ROOT/rootfs/etc/default/docker
 
+# Add user to docker group
+chroot $TEGRA_ROOT/rootfs qemu-arm-static /bin/bash -c 'usermod -aG docker ubuntu'
+
 # Cleanup
 chroot $TEGRA_ROOT/rootfs qemu-arm-static /bin/bash -c 'mv /sbin/initctl.bak /sbin/initctl'
 mv $TEGRA_ROOT/rootfs/etc/resolv.conf.orig $TEGRA_ROOT/rootfs/etc/resolv.conf
