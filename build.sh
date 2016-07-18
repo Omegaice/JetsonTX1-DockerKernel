@@ -125,12 +125,12 @@ curl -o $TEGRA_ROOT/rootfs/aufs-tools_3.2+20130722-1.1_armhf.deb http://launchpa
 chroot $TEGRA_ROOT/rootfs qemu-arm-static /bin/bash -c 'dpkg -i /aufs-tools_3.2+20130722-1.1_armhf.deb'
 rm $TEGRA_ROOT/rootfs/aufs-tools_3.2+20130722-1.1_armhf.deb
 
-cp $ROOT/docker-hypriot_1.10.3-1_armhf.deb $TEGRA_ROOT/rootfs
+cp $ROOT/package/docker-hypriot_1.10.3-1_armhf.deb $TEGRA_ROOT/rootfs
 chroot $TEGRA_ROOT/rootfs qemu-arm-static /bin/bash -c 'dpkg -i /docker-hypriot_1.10.3-1_armhf.deb'
 rm $TEGRA_ROOT/rootfs/docker-hypriot_1.10.3-1_armhf.deb
 
 
-cp $ROOT/docker-compose_1.7.1-41_armhf.deb $TEGRA_ROOT/rootfs
+cp $ROOT/package/docker-compose_1.7.1-41_armhf.deb $TEGRA_ROOT/rootfs
 chroot $TEGRA_ROOT/rootfs qemu-arm-static /bin/bash -c 'dpkg -i /docker-compose_1.7.1-41_armhf.deb'
 rm $TEGRA_ROOT/rootfs/docker-compose_1.7.1-41_armhf.deb 
 
