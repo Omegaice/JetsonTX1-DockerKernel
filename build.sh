@@ -1,5 +1,6 @@
 #!/bin/bash
 set -e
+set -x
 
 ROOT=$PWD
 KERNEL_VERSION=3.10.67-g458d45c
@@ -12,7 +13,7 @@ if [ "x$THISUSER" != "xroot" ]; then
 fi
 
 # Install Required Tools
-apt-get install -y curl gcc-aarch64-linux-gnu gcc-arm-linux-gnueabihf git-core
+apt-get install -y curl gcc-aarch64-linux-gnu gcc-arm-linux-gnueabihf git-core qemu-user-static
 
 # Setup Cross Compile Variables
 export CROSS_COMPILE=/usr/bin/aarch64-linux-gnu-
@@ -44,7 +45,7 @@ fi
 # Extract
 tar xjf Scripts.tbz2
 cd $TEGRA_ROOT/rootfs
-tar jxpf ../../Filesystem.tbz2
+tar jxpf ../../Filesystem.tbz2 
 
 # Checkout Kernel
 mkdir -p $TEGRA_ROOT/sources
@@ -109,6 +110,38 @@ mv kernel_supplements.tbz2 $TEGRA_ROOT/kernel
 # Apply Binaries
 cd $TEGRA_ROOT
 ./apply_binaries.sh
+
+# Prepare for chroot
+mv $TEGRA_ROOT/rootfs/etc/resolv.conf $TEGRA_ROOT/rootfs/etc/resolv.conf.orig
+cp /etc/resolv.conf $TEGRA_ROOT/rootfs/etc/resolv.conf
+cp $(which qemu-arm-static) $TEGRA_ROOT/rootfs/usr/bin/qemu-arm-static
+
+chroot $TEGRA_ROOT/rootfs qemu-arm-static /bin/bash -c 'mv /sbin/initctl /sbin/initctl.bak && ln -s /bin/true /sbin/initctl && apt-get update'
+
+# Install Docker
+chroot $TEGRA_ROOT/rootfs qemu-arm-static /bin/bash -c 'touch /etc/init.d/cgroup-lite && apt-get install -y cgroup-lite'
+
+curl -o $TEGRA_ROOT/rootfs/aufs-tools_3.2+20130722-1.1_armhf.deb http://launchpadlibrarian.net/170861768/aufs-tools_3.2+20130722-1.1_armhf.deb
+chroot $TEGRA_ROOT/rootfs qemu-arm-static /bin/bash -c 'dpkg -i /aufs-tools_3.2+20130722-1.1_armhf.deb'
+rm $TEGRA_ROOT/rootfs/aufs-tools_3.2+20130722-1.1_armhf.deb
+
+cp $ROOT/docker-hypriot_1.10.3-1_armhf.deb $TEGRA_ROOT/rootfs
+chroot $TEGRA_ROOT/rootfs qemu-arm-static /bin/bash -c 'dpkg -i /docker-hypriot_1.10.3-1_armhf.deb'
+rm $TEGRA_ROOT/rootfs/docker-hypriot_1.10.3-1_armhf.deb
+
+
+cp $ROOT/docker-compose_1.7.1-41_armhf.deb $TEGRA_ROOT/rootfs
+chroot $TEGRA_ROOT/rootfs qemu-arm-static /bin/bash -c 'dpkg -i /docker-compose_1.7.1-41_armhf.deb'
+rm $TEGRA_ROOT/rootfs/docker-compose_1.7.1-41_armhf.deb 
+
+# Fix Docker Settings
+curl -o $TEGRA_ROOT/rootfs/etc/init/docker.conf https://raw.githubusercontent.com/docker/docker/v1.10.3/contrib/init/upstart/docker.conf
+sed -i "s/overlay/aufs/g" $TEGRA_ROOT/rootfs/etc/default/docker
+
+# Cleanup
+chroot $TEGRA_ROOT/rootfs qemu-arm-static /bin/bash -c 'mv /sbin/initctl.bak /sbin/initctl'
+mv $TEGRA_ROOT/rootfs/etc/resolv.conf.orig $TEGRA_ROOT/rootfs/etc/resolv.conf
+rm $TEGRA_ROOT/rootfs/usr/bin/qemu-arm-static
 
 # Flash Kernel
 ./flash.sh jetson-tx1 mmcblk0p1
