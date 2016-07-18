@@ -62,6 +62,7 @@ git apply < $ROOT/include_net_route_uid.patch
 git apply < $ROOT/net_ipv4_route_uid.patch
 git apply < $ROOT/net_filter_xt_qtaguid_uid.patch
 git apply < $ROOT/net_filter_xt_quota2_uid.patch
+git apply < $ROOT/drivers_platform_tegra_clocks.patch
 
 # Setup AUFS
 git clone --depth 1 --branch aufs3.10.x git://git.code.sf.net/p/aufs/aufs3-standalone
@@ -108,13 +109,6 @@ mv kernel_supplements.tbz2 $TEGRA_ROOT/kernel
 # Apply Binaries
 cd $TEGRA_ROOT
 ./apply_binaries.sh
-
-# Get cgroupfs-mount
-git clone --depth 1 https://github.com/tianon/cgroupfs-mount.git
-cp cgroupfs-mount/cgroupfs-mount $TEGRA_ROOT/rootfs/usr/bin
-cp cgroupfs-mount/cgroupfs-umount $TEGRA_ROOT/rootfs/usr/bin
-cp cgroupfs-mount/debian/cgroupfs-mount.upstart $TEGRA_ROOT/rootfs/etc/init/cgroupfs-mount.conf
-rm -rf cgroupfs-mount.git
 
 # Flash Kernel
 ./flash.sh jetson-tx1 mmcblk0p1
