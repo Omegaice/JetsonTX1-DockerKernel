@@ -54,16 +54,16 @@ git clone --depth 1 --branch tegra-l4t-r23.2 git://nv-tegra.nvidia.com/linux-3.1
 cd $TEGRA_ROOT/sources/kernel
 
 # Patch Kernel
-git apply < $ROOT/vdso_arm_compile.patch
-git apply < $ROOT/remove_dirty_postfix.patch
-git apply < $ROOT/kernel_cgroup_uid.patch
-git apply < $ROOT/fs_proc_base_uid.patch
-git apply < $ROOT/drivers_misc_profiler_uid.patch
-git apply < $ROOT/include_net_route_uid.patch
-git apply < $ROOT/net_ipv4_route_uid.patch
-git apply < $ROOT/net_filter_xt_qtaguid_uid.patch
-git apply < $ROOT/net_filter_xt_quota2_uid.patch
-git apply < $ROOT/drivers_platform_tegra_clocks.patch
+git apply < $ROOT/patch/vdso_arm_compile.patch
+git apply < $ROOT/patch/remove_dirty_postfix.patch
+git apply < $ROOT/patch/kernel_cgroup_uid.patch
+git apply < $ROOT/patch/fs_proc_base_uid.patch
+git apply < $ROOT/patch/drivers_misc_profiler_uid.patch
+git apply < $ROOT/patch/include_net_route_uid.patch
+git apply < $ROOT/patch/net_ipv4_route_uid.patch
+git apply < $ROOT/patch/net_filter_xt_qtaguid_uid.patch
+git apply < $ROOT/patch/net_filter_xt_quota2_uid.patch
+git apply < $ROOT/patch/drivers_platform_tegra_clocks.patch
 
 # Setup AUFS
 git clone --depth 1 --branch aufs3.10.x git://git.code.sf.net/p/aufs/aufs3-standalone
