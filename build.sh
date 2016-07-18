@@ -1,5 +1,6 @@
 #!/bin/bash
 set -e
+set -o xtrace
 
 ROOT=$PWD
 
@@ -24,70 +25,70 @@ export ARCH=arm64
 
 # Download Tegra driver scripts and root filesystem
 if [ ! -f Scripts.tbz2 ]; then
-    curl -o Scripts.tbz2 http://developer.download.nvidia.com/embedded/L4T/r24_Release_v1.0/Vulkan_Beta/Tegra210_Linux_R24.0.1_armhf.tbz2
+    curl -o Scripts.tbz2 http://developer.download.nvidia.com/embedded/L4T/r24_Release_v1.0/24.1_32bit/Tegra210_Linux_R24.1.0_armhf.tbz2
 fi
 
 if [ ! -f Filesystem.tbz2 ]; then
-    curl -o Filesystem.tbz2 http://developer.download.nvidia.com/embedded/L4T/r24_Release_v1.0/Vulkan_Beta/Tegra_Linux_Sample-Root-Filesystem_R24.0.1_armhf.tbz2
+    curl -o Filesystem.tbz2 http://developer.download.nvidia.com/embedded/L4T/r24_Release_v1.0/24.1_32bit/Tegra_Linux_Sample-Root-Filesystem_R24.1.0_armhf.tbz2
 fi
 
 if [ ! -f Kernel.tbz2 ]; then
-    curl -o Kernel.tbz2 http://developer.download.nvidia.com/embedded/L4T/r24_Release_v1.0/Vulkan_Beta/source/kernel_src.tbz2
+    curl -o Kernel.tbz2 http://developer.download.nvidia.com/embedded/L4T/r24_Release_v1.0/24.1_64bit/source/kernel_src.tbz2
 fi
 
-# Destroy old versions
-if [ -d $ROOT/build ]; then
-    rm -rf $ROOT/build
-fi 
+# # Destroy old versions
+# if [ -d $ROOT/build ]; then
+#     rm -rf $ROOT/build
+# fi 
 
-if [ -d $TEGRA_ROOT ]; then
-    rm -rf $TEGRA_ROOT
-fi
+# if [ -d $TEGRA_ROOT ]; then
+#     rm -rf $TEGRA_ROOT
+# fi
 
-# Extract
-tar xjf Scripts.tbz2
-cd $TEGRA_ROOT/rootfs
-tar jxpf ../../Filesystem.tbz2
+# # Extract
+# tar xjf Scripts.tbz2
+# cd $TEGRA_ROOT/rootfs
+# tar jxpf ../../Filesystem.tbz2
 
-# Checkout Kernel
-mkdir -p $TEGRA_ROOT/sources
-cd $TEGRA_ROOT/sources
-git clone --depth 1 --branch tegra-l4t-r23.2 git://nv-tegra.nvidia.com/linux-3.10.git kernel
-rm -rf kernel/*
-tar xjf $ROOT/Kernel.tbz2
+# # Checkout Kernel
+# mkdir -p $TEGRA_ROOT/sources
+# cd $TEGRA_ROOT/sources
+# git clone --depth 1 --branch tegra-l4t-r24.1 git://nv-tegra.nvidia.com/linux-3.10.git kernel
+# rm -rf kernel/*
+# tar xjf $ROOT/Kernel.tbz2
 cd $TEGRA_ROOT/sources/kernel
 
-# Patch Kernel
-cat $ROOT/vdso_arm_compile.patch | patch -p1
-#cat $ROOT/remove_dirty_postfix.patch | patch -p1
-#cat $ROOT/kernel_cgroup_uid.patch | patch -p1
-#cat $ROOT/fs_proc_base_uid.patch | patch -p1
-#cat $ROOT/drivers_misc_profiler_uid.patch | patch -p1
-#cat $ROOT/include_net_route_uid.patch | patch -p1
-#cat $ROOT/net_ipv4_route_uid.patch | patch -p1
-#cat $ROOT/net_filter_xt_qtaguid_uid.patch | patch -p1
-#cat $ROOT/net_filter_xt_quota2_uid.patch | patch -p1
+# # Patch Kernel
+# cat $ROOT/vdso_arm_compile.patch | patch -p1
+# cat $ROOT/drivers_platform_tegra_clocks.patch | patch -p1
+# #cat $ROOT/remove_dirty_postfix.patch | patch -p1
+# #cat $ROOT/kernel_cgroup_uid.patch | patch -p1
+# #cat $ROOT/fs_proc_base_uid.patch | patch -p1
+# #cat $ROOT/drivers_misc_profiler_uid.patch | patch -p1
+# #cat $ROOT/include_net_route_uid.patch | patch -p1
+# #cat $ROOT/net_ipv4_route_uid.patch | patch -p1
+# #cat $ROOT/net_filter_xt_qtaguid_uid.patch | patch -p1
+# #cat $ROOT/net_filter_xt_quota2_uid.patch | patch -p1
 
 # Setup AUFS
-git clone --depth 1 --branch aufs3.10.x git://git.code.sf.net/p/aufs/aufs3-standalone
+# git clone --depth 1 --branch aufs3.10.x git://git.code.sf.net/p/aufs/aufs3-standalone
 
-cd $TEGRA_ROOT/sources/kernel/aufs3-standalone
-rm include/uapi/linux/Kbuild
-cp -rp *.patch fs include Documentation ../
+# cd $TEGRA_ROOT/sources/kernel/aufs3-standalone
+# rm include/uapi/linux/Kbuild
+# cp -rp *.patch fs include Documentation ../
 
-cd $TEGRA_ROOT/sources/kernel
-cat aufs3-kbuild.patch | patch -p1
-cat aufs3-base.patch | patch -p1
-cat aufs3-mmap.patch | patch -p1
-cat aufs3-standalone.patch | patch -p1
+# cd $TEGRA_ROOT/sources/kernel
+# cat aufs3-kbuild.patch | patch -p1
+# cat aufs3-base.patch | patch -p1
+# cat aufs3-mmap.patch | patch -p1
+# cat aufs3-standalone.patch | patch -p1
 
-rm -rf aufs3-standalone *.patch
-
-exit
+# rm -rf aufs3-standalone *.patch
 
 # Build Kernel
 mkdir -p $TEGRA_KERNEL_OUT
-cp $ROOT/config $TEGRA_KERNEL_OUT/.config
+#cp $ROOT/config $TEGRA_KERNEL_OUT/.config
+make O=$TEGRA_KERNEL_OUT clean
 make O=$TEGRA_KERNEL_OUT zImage
 make O=$TEGRA_KERNEL_OUT dtbs
 make O=$TEGRA_KERNEL_OUT modules
