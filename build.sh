@@ -50,7 +50,7 @@ tar jxpf ../../Filesystem.tbz2
 # Checkout Kernel
 mkdir -p $TEGRA_ROOT/sources
 cd $TEGRA_ROOT/sources
-git clone --depth 1 --branch tegra-l4t-r23.2 git://nv-tegra.nvidia.com/linux-3.10.git kernel
+git clone --depth 1 --branch tegra-l4t-r23.2.update-01 git://nv-tegra.nvidia.com/linux-3.10.git kernel
 cd $TEGRA_ROOT/sources/kernel
 
 # Patch Kernel
